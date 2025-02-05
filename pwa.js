@@ -1,43 +1,7 @@
-// @ts-check
-
-/**
- * @typedef {function} AddEventListener
- * @param {string} eventName Name of event to add
- * @param {EventListener} callback Callback when event is fired
- * @returns {void}
- */
-
-/**
- * @typedef {object} ServiceWorkerGlobalScope
- * @property {function} skipWaiting skip the waiting
- * @property {AddEventListener} addEventListener Add event listener
- * @property {any} clients Service worker clients
- */
-
-/**
- * Service worker for Progressive Web App 
- * */
 class Pwa {
-    /**
-     * Create a new instance
-     * @param {ServiceWorkerGlobalScope} self 
-     */
     constructor(self) {
-        /**
-         * Global scope
-         * @type {ServiceWorkerGlobalScope}
-         */
         this.scope = self;
-
-        /**
-         * Cache version
-         * @type {number}
-         */
         this.CACHE_VERSION = 1.3;
-        /**
-         * Pre-emptive files to cache
-         * @type {string[]}
-         */
         this.BASE_CACHE_FILES = [
             '/index.html',
             '/pwa/404.html',
@@ -48,49 +12,19 @@ class Pwa {
             '/images/logo.png',
             '/js/app.js',
         ];
-        /**
-         * Page to redirect to when offline
-         * @type {string}
-         */
         this.OFFLINE_PAGE = '/pwa/offline.html';
-        /**
-         * Page to show when not found (404)
-         * @type {string}
-         */
         this.NOT_FOUND_PAGE = '/pwa/404.html';
-        /**
-         * Versioned cache
-         * @type {string}
-         */
         this.CACHE_NAME = `content-v${this.CACHE_VERSION}`;
-        /**
-         * The time to live in cache
-         * @type {object}
-         */
         this.MAX_TTL = 86400;
 
-        /**
-         * Extensions with no expiration in the cache
-         * @type {string[]}
-         */
         this.TTL_EXCEPTIONS = ["jpg", "jpeg", "png", "gif", "mp4"];
     }
 
-    /**
-    * Get the extension of a file from URL
-    * @param {string} url
-    * @returns {string} The extension
-    */
     getFileExtension(url) {
         const extension = url.split('.').reverse()[0].split('?')[0];
         return (extension.endsWith('/')) ? '/' : extension;
     }
 
-    /**
-     * Get time to live for cache by extension
-     * @param {string} url
-     * @returns {number} Time to live in seconds 
-     */
     getTTL(url) {
         if (typeof url === 'string') {
             const extension = this.getFileExtension(url);
@@ -112,10 +46,6 @@ class Pwa {
         }
     }
 
-    /**
-     * Removes prior cache version
-     * @returns {Promise}
-     */
     cleanupLegacyCache() {
 
         const currentCaches = [this.CACHE_NAME];
@@ -141,10 +71,6 @@ class Pwa {
             });
     }
 
-    /**
-     * Pre-fetches URL to store to cache
-     * @param {string} url 
-     */
     async preCacheUrl(url) {
         const cache = await caches.open(this.CACHE_NAME);
         const response = await cache.match(url);
@@ -154,10 +80,6 @@ class Pwa {
         return null;
     }
 
-    /**
-     * Registers the various service worker functions
-     * @returns {void}
-     */
     register() {
         this.scope.addEventListener('install', event => {
             event.waitUntil(
@@ -225,10 +147,6 @@ class Pwa {
     }
 }
 
-/** 
- * Sadly this is a pathetic hack to workaround JsDoc limitations
- * Casting what the IDE thinks is Window to service worker scope 
- * @type {any} */
 const _self = self;
 var pwa = new Pwa(/**@type {ServiceWorkerGlobalScope}*/(_self));
 pwa.register();
