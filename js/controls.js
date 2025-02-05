@@ -2,12 +2,15 @@ import { Navigator } from "./navigator.js"
 
 export class Controls extends HTMLElement {
 
-   constructor() {
+    constructor() {
         super();
         this._controlRef = null;
         this._deck = null;
     }
 
+    /**
+     * Called when the element is inserted into the DOM. Used to fetch the template and wire into the related Navigator instance.
+     */
     async connectedCallback() {
         const response = await fetch("./templates/controls.html");
         const template = await response.text();
@@ -15,7 +18,13 @@ export class Controls extends HTMLElement {
         const host = document.createElement("div");
         host.innerHTML = template;
         this.appendChild(host);
-        this._controlRef = {};
+        this._controlRef = {
+            first: (document.getElementById("ctrlFirst")),
+            prev: (document.getElementById("ctrlPrevious")),
+            next: (document.getElementById("ctrlNext")),
+            last: (document.getElementById("ctrlLast")),
+            pos: (document.getElementById("position"))
+        };
         this._controlRef.first.addEventListener("click", () => this._deck.jumpTo(0));
         this._controlRef.prev.addEventListener("click", () => this._deck.previous());
         this._controlRef.next.addEventListener("click", () => this._deck.next());
@@ -30,12 +39,15 @@ export class Controls extends HTMLElement {
     async attributeChangedCallback(attrName, oldVal, newVal) {
         if (attrName === "deck") {
             if (oldVal !== newVal) {
-                this._deck = /** @type {Navigator} */(document.getElementById(newVal));
+                this._deck = (document.getElementById(newVal));
                 this._deck.addEventListener("slideschanged", () => this.refreshState());
             }
         }
     }
 
+    /**
+     * Enables/disables buttons and updates position based on index in the deck
+     */
     refreshState() {
         if (this._controlRef == null) {
             return;
