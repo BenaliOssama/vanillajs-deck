@@ -3,7 +3,6 @@
 import { loadSlides } from "./slideLoader.js"
 import { Slide } from "./slide.js"
 import { Router } from "./router.js"
-import { Animator } from "./animator.js"
 
 /**
  * The main class that handles rendering the slide decks
@@ -16,15 +15,6 @@ export class Navigator extends HTMLElement {
      */
     constructor() {
         super();
-        /**
-         * The related animation control
-         * @type {Animator}
-         */
-        this._animator = new Animator();
-        /**
-         * The related router control
-         * @type {Router}
-         */
         this._router = new Router();
         /**
          * The last known route
@@ -131,9 +121,6 @@ export class Navigator extends HTMLElement {
      * @param {number} slideIdx The index of the slide to navigate to
      */
     jumpTo(slideIdx) {
-        if (this._animator.transitioning) {
-            return;
-        }
         if (slideIdx >= 0 && slideIdx < this.totalSlides) {
             this._currentIndex = slideIdx;
             this.innerHTML = '';
@@ -142,9 +129,6 @@ export class Navigator extends HTMLElement {
             this._route = this._router.getRoute();
             document.title = `${this.currentIndex + 1}/${this.totalSlides}: ${this.currentSlide.title}`;
             this.dispatchEvent(this.slidesChangedEvent);
-            if (this._animator.animationReady) {
-                this._animator.endAnimation(this.querySelector("div"));
-            }
         }
     }
 
@@ -171,15 +155,7 @@ export class Navigator extends HTMLElement {
             return;
         }
         if (this.hasNext) {
-            if (this.currentSlide.transition !== null) {
-                this._animator.beginAnimation(
-                    this.currentSlide.transition,
-                    this.querySelector("div"),
-                    () => this.jumpTo(this.currentIndex + 1));
-            }
-            else {
-                this.jumpTo(this.currentIndex + 1);
-            }
+            this.jumpTo(this.currentIndex + 1);
         }
     }
 
